@@ -1,6 +1,6 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import { Stack, usePathname, useRouter, type Href } from "expo-router";
+import { Stack, usePathname, useRouter, useRootNavigationState, type Href } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -68,10 +68,12 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const rootState = useRootNavigationState();
 
   useEffect(() => {
-    console.log('[AuthGate] state', { isAuthenticated, loading, pathname });
+    console.log('[AuthGate] state', { isAuthenticated, loading, pathname, rootReady: !!rootState?.key });
     if (loading) return;
+    if (!rootState?.key) return;
 
     const onLoginRoute = pathname === '/login';
 
@@ -80,7 +82,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     } else if (isAuthenticated && onLoginRoute) {
       router.replace('/(tabs)' as Href);
     }
-  }, [isAuthenticated, loading, pathname, router]);
+  }, [isAuthenticated, loading, pathname, router, rootState?.key]);
 
   return <>{children}</>;
 }
